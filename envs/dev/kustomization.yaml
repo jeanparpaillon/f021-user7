@@ -29,7 +29,7 @@ configMapGenerator:
 images:
   - name: wordpress
     newName: ghcr.io/jeanparpaillon/f021-user7
-    newTag: "0000000"
+    newTag: "88e655f"
 
 patches:
   - target:
