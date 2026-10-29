@@ -69,26 +69,3 @@ jobs:
         env:
           REF: ${{ steps.tag.outputs.image }}:${{ steps.tag.outputs.tag }}
         run: docker push "$REF"
-
-  # The push way: the runner holds a kubeconfig for your namespace and
-  # applies the dev overlay with the new tag. The tag is set in the
-  # runner's checkout only — it is never committed.
-  deploy:
-    needs: image
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to dev
-        env:
-          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DEV }}
-          REF: ${{ needs.image.outputs.image }}:${{ needs.image.outputs.tag }}
-        run: |
-          printf '%s\n' "$KUBECONFIG_DATA" > "$RUNNER_TEMP/kubeconfig"
-          export KUBECONFIG=$RUNNER_TEMP/kubeconfig
-          cd envs/dev
-          kustomize edit set image "wordpress=$REF"
-          kubectl apply -k .
-          kubectl rollout status deploy/wordpress-dev --timeout=5m
